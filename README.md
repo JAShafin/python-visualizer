@@ -44,6 +44,18 @@ python app.py
 
 Open `http://127.0.0.1:5000`.
 
+## Deploy on Render
+
+This repository includes `/render.yaml` for one-click Blueprint deploys.
+
+1. Push this repository to GitHub.
+2. In Render, click **New +** → **Blueprint**.
+3. Select this repository and approve the detected `render.yaml`.
+4. Render will run:
+   - Build: `pip install -r requirements.txt`
+   - Start: `gunicorn app:app`
+5. Open the generated Render URL to use the app on the internet.
+
 ## Tests
 
 ```bash

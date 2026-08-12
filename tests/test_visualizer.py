@@ -34,6 +34,18 @@ class ApiTests(unittest.TestCase):
         response = self.client.post("/api/trace", json={"code": ""})
         self.assertEqual(response.status_code, 400)
 
+    def test_root_serves_index(self):
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Python Visualizer MVP", response.data)
+        response.close()
+
+    def test_unknown_path_falls_back_to_index(self):
+        response = self.client.get("/learn/python")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Python Visualizer MVP", response.data)
+        response.close()
+
 
 class FrontendSmokeTests(unittest.TestCase):
     def test_index_contains_required_panels(self):

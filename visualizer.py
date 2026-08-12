@@ -66,9 +66,20 @@ def run_user_code(code: str, stdin_text: str = "") -> dict[str, Any]:
 	stderr_capture = io.StringIO()
 	stdin_capture = io.StringIO(stdin_text)
 
+	def mocked_input(prompt: str = "") -> str:
+		if prompt:
+			print(prompt, end="", file=stdout_capture)
+		line = stdin_capture.readline()
+		if line == "":
+			return ""
+		return line.rstrip("\n").rstrip("\r")
+
+	user_builtins = dict(builtins.__dict__)
+	user_builtins["input"] = mocked_input
+
 	user_globals: dict[str, Any] = {
 		"__name__": "__main__",
-		"__builtins__": builtins.__dict__,
+		"__builtins__": user_builtins,
 	}
 	events: list[dict[str, Any]] = []
 	previous_trace = sys.gettrace()

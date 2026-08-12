@@ -12,6 +12,12 @@ class VisualizerTests(unittest.TestCase):
 		self.assertEqual(result["stdout"], "ALICE\n")
 		self.assertTrue(any(event["event"] == "line" for event in result["events"]))
 
+	def test_run_user_code_returns_empty_string_for_blank_input(self):
+		result = run_user_code("value = input()\nprint(value)", "")
+
+		self.assertEqual(result["status"], "ok")
+		self.assertEqual(result["stdout"], "\n")
+
 	def test_trace_api_accepts_program_input(self):
 		app = create_app()
 		client = app.test_client()

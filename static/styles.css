@@ -12,27 +12,38 @@ header {
   padding: 20px;
 }
 
-/* Two Column Layout */
 .container {
   display: flex;
-  gap: 30px;
+  flex-direction: column;
+  gap: 20px;
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.left-column {
-  flex: 1;
+.top-section {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.right-column {
+.bottom-section {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  /* This forces both sides to start at the exact same height! */
+}
+
+.bottom-left,
+.bottom-right {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  width: 50%;
+}
+
+.bottom-right {
   background: white;
   padding: 25px;
   border-radius: 8px;
@@ -49,11 +60,9 @@ textarea {
   box-sizing: border-box;
 }
 
-/* Buttons */
 .controls {
   display: flex;
   gap: 10px;
-  padding: 10px 0;
 }
 
 button {
@@ -78,19 +87,18 @@ button:hover {
   background-color: #238636;
 }
 
-/* Black Code Window */
 .black-window {
   background-color: #0d1117;
   color: #c9d1d9;
   padding: 15px;
   border-radius: 8px;
   font-family: monospace;
-  min-height: 250px;
+  min-height: 400px;
   overflow-y: auto;
   line-height: 1.5;
+  margin: 0;
 }
 
-/* Right Side Data Boxes */
 .data-box {
   background-color: #f6f8fa;
   border: 1px solid #d0d7de;
@@ -106,6 +114,11 @@ button:hover {
   line-height: 1.6;
   background-color: #e6f2ff;
   border-color: #b3d7ff;
+  white-space: pre-wrap;
+  /* This allows Python's \n to actually make a new line! */
+  max-height: 300px;
+  overflow-y: auto;
+  /* Adds a scrollbar if the history gets too long */
 }
 
 .error-text {

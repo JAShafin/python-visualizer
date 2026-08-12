@@ -15,11 +15,11 @@
   </header>
 
   <main class="container">
-    <!-- LEFT COLUMN: Code, Inputs, Buttons, and Black Window -->
-    <div class="left-column">
+    <!-- TOP SECTION: Inputs and Controls -->
+    <div class="top-section">
       <div class="input-section">
         <label for="code-input"><strong>Python code</strong></label>
-        <textarea id="code-input" rows="12" placeholder="Type your Python code here..."></textarea>
+        <textarea id="code-input" rows="10" placeholder="Type your Python code here..."></textarea>
       </div>
 
       <div class="input-section">
@@ -38,29 +38,30 @@
         <label for="timeline">Timeline: </label>
         <input type="range" id="timeline" min="0" value="0">
       </div>
+    </div>
 
-      <div class="visualizer-window">
+    <!-- BOTTOM SECTION: Side-by-side Alignment -->
+    <div class="bottom-section">
+      <div class="bottom-left">
         <h3>Code Line Sync</h3>
         <pre id="code-display" class="black-window">Run a trace to see code execution...</pre>
       </div>
-    </div>
 
-    <!-- RIGHT COLUMN: Explanations and Outputs -->
-    <div class="right-column">
-      <h3>Call Stack</h3>
-      <div id="call-stack-display" class="data-box">Main</div>
+      <div class="bottom-right">
+        <h3>Call Stack</h3>
+        <div id="call-stack-display" class="data-box">Main Script</div>
 
-      <h3>Explanation</h3>
-      <!-- This replaces the weird Variables table -->
-      <div id="explanation-display" class="data-box explanation-text">
-        Waiting for trace to begin...
+        <h3>Explanation History</h3>
+        <div id="explanation-display" class="data-box explanation-text">
+          Waiting for trace to begin...
+        </div>
+
+        <h3>Output</h3>
+        <pre id="output-display" class="data-box"></pre>
+
+        <h3>Errors</h3>
+        <pre id="error-display" class="data-box error-text"></pre>
       </div>
-
-      <h3>Output</h3>
-      <pre id="output-display" class="data-box"></pre>
-
-      <h3>Errors</h3>
-      <pre id="error-display" class="data-box error-text"></pre>
     </div>
   </main>
 

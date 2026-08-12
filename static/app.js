@@ -1,67 +1,3 @@
-let traceData = [];
-let currentStepIndex = 0;
-
-// Connect to the UI Elements from index.html
-const codeInput = document.getElementById('code-input');
-const programInputs = document.getElementById('program-inputs');
-const runBtn = document.getElementById('run-btn');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
-const resetBtn = document.getElementById('reset-btn');
-const timeline = document.getElementById('timeline');
-
-// Connect to the Display Data Boxes
-const codeDisplay = document.getElementById('code-display');
-const callStackDisplay = document.getElementById('call-stack-display');
-const explanationDisplay = document.getElementById('explanation-display');
-const outputDisplay = document.getElementById('output-display');
-const errorDisplay = document.getElementById('error-display');
-
-// When the user clicks "Run Trace"
-runBtn.addEventListener('click', async () => {
-  const code = codeInput.value;
-  const inputs = programInputs.value;
-
-  if (!code.trim()) {
-    alert("Please enter some Python code to trace.");
-    return;
-  }
-
-  try {
-    // FIX #1: Pointing to the correct URL from app.py
-    const response = await fetch('/api/trace', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: code, input: inputs })
-    });
-
-    const data = await response.json();
-
-    // FIX #2: Handle the specific error format app.py sends
-    if (data.status === "error") {
-      errorDisplay.innerText = data.error;
-      return;
-    }
-
-    // FIX #3: Capture the array of trace steps directly
-    traceData = data || [];
-    if (traceData.length === 0) {
-      explanationDisplay.innerText = "No trace data generated.";
-      return;
-    }
-
-    // Setup timeline and starting state
-    timeline.max = traceData.length - 1;
-    currentStepIndex = 0;
-    timeline.value = 0;
-
-    updateUI();
-
-  } catch (err) {
-    errorDisplay.innerText = "Failed to connect to the server.";
-  }
-});
-
 // Function to update the screen whenever you click Next or Previous
 function updateUI() {
   if (traceData.length === 0) return;
@@ -86,34 +22,19 @@ function updateUI() {
   }
   codeDisplay.innerHTML = highlightedCode;
 
+  // Build the Explanation History! (Never deletes old stuff)
+  let historyText = "";
+  for (let i = 0; i <= currentStepIndex; i++) {
+    if (traceData[i].explanation) {
+      historyText += traceData[i].explanation + "\n\n"; // Adds space between steps
+    }
+  }
+  explanationDisplay.innerText = historyText;
+  // Auto-scroll to the bottom of the history box
+  explanationDisplay.scrollTop = explanationDisplay.scrollHeight;
+
   // Update the right side boxes
-  callStackDisplay.innerText = step.call_stack || "Main";
-  explanationDisplay.innerText = step.explanation || "No changes to report.";
+  callStackDisplay.innerText = step.call_stack || "Main Script";
   outputDisplay.innerText = step.output || "";
   errorDisplay.innerText = step.error || "";
 }
-
-// Button Click Events
-nextBtn.addEventListener('click', () => {
-  if (currentStepIndex < traceData.length - 1) {
-    currentStepIndex++;
-    updateUI();
-  }
-});
-
-prevBtn.addEventListener('click', () => {
-  if (currentStepIndex > 0) {
-    currentStepIndex--;
-    updateUI();
-  }
-});
-
-resetBtn.addEventListener('click', () => {
-  currentStepIndex = 0;
-  updateUI();
-});
-
-timeline.addEventListener('input', (e) => {
-  currentStepIndex = parseInt(e.target.value);
-  updateUI();
-});

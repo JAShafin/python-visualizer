@@ -21,8 +21,13 @@ def run_user_code(code, program_inputs=""):
             return trace_calls
 
         if event in ['line', 'return']:
-            # Extract variables, ignoring python internal stuff (like __builtins__)
-            clean_vars = {k: v for k, v in frame.f_locals.items() if not k.startswith('__') and not str(type(v)) == "<class 'module'>"}
+            # Extract variables, ignoring python internal stuff, modules, AND functions (callables)
+            clean_vars = {
+                k: v for k, v in frame.f_locals.items() 
+                if not k.startswith('__') 
+                and not callable(v) 
+                and not str(type(v)) == "<class 'module'>"
+            }
             
             # Generate the natural language explanation
             if clean_vars:
@@ -35,10 +40,12 @@ def run_user_code(code, program_inputs=""):
             call_stack = []
             f = frame
             while f and f.f_code.co_filename == "<string>":
-                call_stack.insert(0, f.f_code.co_name)
+                # Clean up the name for the main script
+                name = "Main Script" if f.f_code.co_name == "<module>" else f.f_code.co_name
+                call_stack.insert(0, name)
                 f = f.f_back
             
-            stack_str = " -> ".join(call_stack) if call_stack else "Main"
+            stack_str = " -> ".join(call_stack) if call_stack else "Main Script"
 
             # Save the snapshot of this exact moment
             trace_steps.append({
@@ -88,7 +95,7 @@ def run_user_code(code, program_inputs=""):
         trace_steps.append({
             "line": None,
             "explanation": "Execution finished.",
-            "call_stack": "Main",
+            "call_stack": "Main Script",
             "output": output_buffer.getvalue(),
             "error": error_msg
         })

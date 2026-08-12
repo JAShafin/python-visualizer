@@ -35,6 +35,10 @@ textarea {
   margin: 0.5rem 0;
 }
 
+#inputValues {
+  min-height: 6rem;
+}
+
 .buttons {
   display: flex;
   gap: 0.5rem;

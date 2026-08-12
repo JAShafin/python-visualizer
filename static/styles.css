@@ -30,9 +30,17 @@ header {
 
 textarea {
   width: 100%;
-  min-height: 18rem;
   font-family: "Fira Code", monospace;
   margin: 0.5rem 0;
+  resize: vertical;
+}
+
+#codeInput {
+  min-height: 18rem;
+}
+
+#programInput {
+  min-height: 7rem;
 }
 
 .buttons {

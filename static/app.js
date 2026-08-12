@@ -1,13 +1,8 @@
-const EXAMPLES = {
-  "Simple loop": `total = 0\nfor i in range(3):\n    total += i\nprint(total)`,
-  "Function call": `def square(x):\n    return x * x\n\nvalue = square(5)\nprint(value)`,
-  "List tracking": `numbers = [1, 2, 3]\nnumbers.append(4)\nprint(numbers)`
-};
-
 let traceEvents = [];
 let currentStep = 0;
 
 const codeInput = document.getElementById("codeInput");
+const programInput = document.getElementById("programInput");
 const codeView = document.getElementById("codeView");
 const stackView = document.getElementById("stackView");
 const variablesView = document.getElementById("variablesView");
@@ -16,21 +11,6 @@ const errorView = document.getElementById("errorView");
 const timeline = document.getElementById("timeline");
 const hintText = document.getElementById("hintText");
 const learningMode = document.getElementById("learningMode");
-const examples = document.getElementById("examples");
-
-function initExamples() {
-  Object.keys(EXAMPLES).forEach((name) => {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    examples.appendChild(option);
-  });
-  examples.addEventListener("change", () => {
-    codeInput.value = EXAMPLES[examples.value];
-    renderCode();
-  });
-  examples.value = Object.keys(EXAMPLES)[0];
-}
 
 function renderCode(activeLine = -1) {
   const lines = codeInput.value.split("\n");
@@ -98,7 +78,7 @@ async function runTrace() {
   const response = await fetch("/api/trace", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ code: codeInput.value })
+    body: JSON.stringify({ code: codeInput.value, stdin: programInput.value })
   });
 
   const payload = await response.json();
@@ -185,10 +165,9 @@ function loadInitialSnippet() {
       // keep fallback
     }
   }
-  codeInput.value = EXAMPLES[examples.value];
+  codeInput.value = "";
 }
 
-initExamples();
 bindControls();
 loadInitialSnippet();
 renderCode();

@@ -1,68 +1,75 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Python Visualizer</title>
-    <link rel="stylesheet" href="/static/styles.css" />
-  </head>
-  <body>
-    <header>
-      <h1>Python Visualizer MVP</h1>
-      <p>Paste Python code, run a safe trace, and step through execution.</p>
-    </header>
 
-    <main class="layout">
-      <section class="panel editor-panel">
-        <label for="examples">Example snippets</label>
-        <select id="examples"></select>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Visualizer</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
 
-        <label for="codeInput">Python code</label>
-        <textarea id="codeInput" spellcheck="false"></textarea>
+<body>
+  <header>
+    <h1>Python Visualizer MVP</h1>
+    <p>Paste Python code, run a safe trace, and step through execution.</p>
+  </header>
 
-        <div class="buttons">
-          <button id="runBtn">Run Trace</button>
-          <button id="saveBtn">Save Snippet</button>
-          <button id="loadBtn">Load Snippet</button>
-          <button id="shareBtn">Share Link</button>
-        </div>
+  <main class="layout">
+    <section class="panel editor-panel">
+      <label for="codeInput">Python code</label>
+      <textarea id="codeInput" spellcheck="false"></textarea>
 
-        <div class="buttons">
-          <button id="prevBtn">Previous</button>
-          <button id="nextBtn">Next</button>
-          <button id="resetBtn">Reset</button>
-        </div>
+      <label for="programInput">Program input</label>
+      <textarea id="programInput" spellcheck="false" placeholder="One value per line"></textarea>
 
-        <label for="timeline">Timeline</label>
-        <input id="timeline" type="range" min="0" max="0" value="0" />
+      <div class="buttons">
+        <button id="runBtn">Run Trace</button>
+        <button id="saveBtn">Save Snippet</button>
+        <button id="loadBtn">Load Snippet</button>
+        <button id="shareBtn">Share Link</button>
+      </div>
 
-        <label><input id="learningMode" type="checkbox" /> Learning mode hints</label>
-        <p id="hintText" class="hint"></p>
-      </section>
+      <div class="buttons">
+        <button id="prevBtn">Previous</button>
+        <button id="nextBtn">Next</button>
+        <button id="resetBtn">Reset</button>
+      </div>
 
-      <section class="panel visual-panel">
-        <h2>Code Line Sync</h2>
-        <pre id="codeView"></pre>
+      <label for="timeline">Timeline</label>
+      <input id="timeline" type="range" min="0" max="0" value="0" />
 
-        <h2>Call Stack</h2>
-        <ul id="stackView"></ul>
+      <label><input id="learningMode" type="checkbox" /> Learning mode hints</label>
+      <p id="hintText" class="hint"></p>
+    </section>
 
-        <h2>Variables</h2>
-        <table>
-          <thead>
-            <tr><th>Scope</th><th>Name</th><th>Value</th></tr>
-          </thead>
-          <tbody id="variablesView"></tbody>
-        </table>
+    <section class="panel visual-panel">
+      <h2>Code Line Sync</h2>
+      <pre id="codeView"></pre>
 
-        <h2>Output</h2>
-        <pre id="outputView"></pre>
+      <h2>Call Stack</h2>
+      <ul id="stackView"></ul>
 
-        <h2>Errors</h2>
-        <pre id="errorView" class="error"></pre>
-      </section>
-    </main>
+      <h2>Variables</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Scope</th>
+            <th>Name</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody id="variablesView"></tbody>
+      </table>
 
-    <script src="/static/app.js"></script>
-  </body>
+      <h2>Output</h2>
+      <pre id="outputView"></pre>
+
+      <h2>Errors</h2>
+      <pre id="errorView" class="error"></pre>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+
 </html>

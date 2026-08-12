@@ -18,9 +18,12 @@ def create_app() -> Flask:
     def trace_code():
         payload = request.get_json(silent=True) or {}
         code = payload.get("code", "")
+        stdin_text = payload.get("stdin", payload.get("input", ""))
         if not isinstance(code, str) or not code.strip():
             return jsonify({"status": "error", "error": "Please provide Python code."}), 400
-        result = run_user_code(code)
+        if not isinstance(stdin_text, str):
+            return jsonify({"status": "error", "error": "Program input must be text."}), 400
+        result = run_user_code(code, stdin_text)
         return jsonify(result)
 
     @app.get("/<path:path>")

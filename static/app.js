@@ -28,20 +28,23 @@ runBtn.addEventListener('click', async () => {
   }
 
   try {
-    const response = await fetch('/run', {
+    // FIX #1: Pointing to the correct URL from app.py
+    const response = await fetch('/api/trace', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: code, inputs: inputs })
+      body: JSON.stringify({ code: code, input: inputs })
     });
 
     const data = await response.json();
 
-    if (data.error && !data.trace) {
+    // FIX #2: Handle the specific error format app.py sends
+    if (data.status === "error") {
       errorDisplay.innerText = data.error;
       return;
     }
 
-    traceData = data.trace || [];
+    // FIX #3: Capture the array of trace steps directly
+    traceData = data || [];
     if (traceData.length === 0) {
       explanationDisplay.innerText = "No trace data generated.";
       return;

@@ -1,11 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python Visualizer</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Visualizer MVP</title>
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
@@ -14,69 +14,53 @@
     <p>Paste Python code, run a safe trace, and step through execution.</p>
   </header>
 
-  <main class="layout">
-    <section class="panel controls-panel">
-      <div class="controls-top-row">
-        <button id="runBtn" class="primary-action">Run Trace</button>
-        <label class="learning-toggle"><input id="learningMode" type="checkbox" /> Learning mode hints</label>
+  <main class="container">
+    <!-- LEFT COLUMN: Code, Inputs, Buttons, and Black Window -->
+    <div class="left-column">
+      <div class="input-section">
+        <label for="code-input"><strong>Python code</strong></label>
+        <textarea id="code-input" rows="12" placeholder="Type your Python code here..."></textarea>
       </div>
 
-      <div class="playback-toolbar">
-        <div class="buttons playback-buttons">
-          <button id="prevBtn">Previous</button>
-          <button id="nextBtn">Next</button>
-          <button id="resetBtn">Reset</button>
-        </div>
-
-        <label class="timeline-field" for="timeline">
-          <span>Timeline</span>
-          <input id="timeline" type="range" min="0" max="0" value="0" />
-        </label>
+      <div class="input-section">
+        <label for="program-inputs"><strong>Program input</strong> (One value per line)</label>
+        <textarea id="program-inputs" rows="3" placeholder="Enter inputs here (e.g. rock)"></textarea>
       </div>
 
-      <p id="hintText" class="hint"></p>
-    </section>
+      <div class="controls">
+        <button id="run-btn" class="primary-btn">Run Trace</button>
+        <button id="prev-btn">Previous</button>
+        <button id="next-btn">Next</button>
+        <button id="reset-btn">Reset</button>
+      </div>
 
-    <div class="workspace">
-      <section class="panel editor-panel">
-        <label for="codeInput">Python code</label>
-        <textarea id="codeInput" spellcheck="false"></textarea>
+      <div class="timeline-container">
+        <label for="timeline">Timeline: </label>
+        <input type="range" id="timeline" min="0" value="0">
+      </div>
 
-        <label for="programInput">Inputs</label>
-        <textarea id="programInput" spellcheck="false" placeholder="One value per line"></textarea>
+      <div class="visualizer-window">
+        <h3>Code Line Sync</h3>
+        <pre id="code-display" class="black-window">Run a trace to see code execution...</pre>
+      </div>
+    </div>
 
-        <div class="buttons action-buttons">
-          <button id="saveBtn">Save Snippet</button>
-          <button id="loadBtn">Load Snippet</button>
-          <button id="shareBtn">Share Link</button>
-        </div>
+    <!-- RIGHT COLUMN: Explanations and Outputs -->
+    <div class="right-column">
+      <h3>Call Stack</h3>
+      <div id="call-stack-display" class="data-box">Main</div>
 
-        <h2>Code Line Sync</h2>
-        <pre id="codeView"></pre>
-      </section>
+      <h3>Explanation</h3>
+      <!-- This replaces the weird Variables table -->
+      <div id="explanation-display" class="data-box explanation-text">
+        Waiting for trace to begin...
+      </div>
 
-      <section class="panel visual-panel">
-        <h2>Call Stack</h2>
-        <ul id="stackView"></ul>
+      <h3>Output</h3>
+      <pre id="output-display" class="data-box"></pre>
 
-        <h2>Variables</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Scope</th>
-              <th>Name</th>
-              <th>Value</th>
-            </tr>
-          </thead>
-          <tbody id="variablesView"></tbody>
-        </table>
-
-        <h2>Output</h2>
-        <pre id="outputView"></pre>
-
-        <h2>Errors</h2>
-        <pre id="errorView" class="error"></pre>
-      </section>
+      <h3>Errors</h3>
+      <pre id="error-display" class="data-box error-text"></pre>
     </div>
   </main>
 

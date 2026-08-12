@@ -1,127 +1,99 @@
-"""Run and trace user Python code for the visualizer UI."""
-
-from __future__ import annotations
-
-import builtins
-import io
 import sys
+import io
 import traceback
-from contextlib import redirect_stderr, redirect_stdout
-from types import FrameType
-from typing import Any
 
+def run_user_code(code, program_inputs=""):
+    # 1. Prepare inputs safely
+    user_inputs_list = program_inputs.split("\n") if program_inputs else []
 
-TRACE_FILENAME = "<user_code>"
-MAX_REPR_LENGTH = 200
+    def safe_mock_input(prompt=""):
+        if len(user_inputs_list) > 0:
+            return user_inputs_list.pop(0)
+        return ""  # If the box is empty, return an empty string instead of crashing
 
+    # 2. Setup tracing variables
+    trace_steps = []
+    output_buffer = io.StringIO()
+    
+    def trace_calls(frame, event, arg):
+        # Only trace the user's actual code (identified by "<string>")
+        if frame.f_code.co_filename != "<string>": 
+            return trace_calls
+
+        if event in ['line', 'return']:
+            # Extract variables, ignoring python internal stuff (like __builtins__)
+            clean_vars = {k: v for k, v in frame.f_locals.items() if not k.startswith('__') and not str(type(v)) == "<class 'module'>"}
+            
+            # Generate the natural language explanation
+            if clean_vars:
+                var_strings = [f"'{k}' is now {repr(v)}" for k, v in clean_vars.items()]
+                explanation = f"Line {frame.f_lineno} executed. Variables: " + ", ".join(var_strings)
+            else:
+                explanation = f"Line {frame.f_lineno} executed."
+
+            # Build the call stack
+            call_stack = []
+            f = frame
+            while f and f.f_code.co_filename == "<string>":
+                call_stack.insert(0, f.f_code.co_name)
+                f = f.f_back
+            
+            stack_str = " -> ".join(call_stack) if call_stack else "Main"
+
+            # Save the snapshot of this exact moment
+            trace_steps.append({
+                "line": frame.f_lineno,
+                "explanation": explanation,
+                "call_stack": stack_str,
+                "output": output_buffer.getvalue(),
+                "error": ""
+            })
+        return trace_calls
+
+    # 3. Setup the execution environment with our fake input function
+    exec_globals = {
+        "__builtins__": __builtins__.copy(),
+        "input": safe_mock_input
+    }
+
+    old_stdout = sys.stdout
+    sys.stdout = output_buffer
+    old_trace = sys.gettrace()
+    sys.settrace(trace_calls)
+
+    error_msg = ""
+    try:
+        # Compile and run the user's code
+        compiled_code = compile(code, "<string>", "exec")
+        exec(compiled_code, exec_globals)
+    except Exception as e:
+        # Catch any actual coding errors the user made
+        error_msg = traceback.format_exc().splitlines()[-1]
+    finally:
+        sys.settrace(old_trace)
+        sys.stdout = old_stdout
+
+    # If there was an error, add a final step to show it on the UI
+    if error_msg:
+        trace_steps.append({
+            "line": None,
+            "explanation": "An error occurred during execution.",
+            "call_stack": "",
+            "output": output_buffer.getvalue(),
+            "error": error_msg
+        })
+
+    # If the user ran empty code
+    if not trace_steps:
+        trace_steps.append({
+            "line": None,
+            "explanation": "Execution finished.",
+            "call_stack": "Main",
+            "output": output_buffer.getvalue(),
+            "error": error_msg
+        })
+
+    return trace_steps
+
+# Explicitly export the function so app.py can import it perfectly
 __all__ = ["run_user_code"]
-
-
-def _safe_repr(value: Any) -> str:
-	try:
-		rendered = repr(value)
-	except Exception:
-		rendered = f"<{type(value).__name__}>"
-
-	if len(rendered) > MAX_REPR_LENGTH:
-		return rendered[: MAX_REPR_LENGTH - 3] + "..."
-	return rendered
-
-
-def _snapshot_mapping(mapping: dict[str, Any]) -> dict[str, str]:
-	return {
-		key: _safe_repr(value)
-		for key, value in mapping.items()
-		if not key.startswith("__")
-	}
-
-
-def _stack_for_frame(frame: FrameType) -> list[dict[str, Any]]:
-	stack: list[dict[str, Any]] = []
-	current = frame
-
-	while current is not None and current.f_code.co_filename == TRACE_FILENAME:
-		stack.append({"function": current.f_code.co_name, "line": current.f_lineno})
-		current = current.f_back
-
-	stack.reverse()
-	return stack
-
-
-def _make_event(frame: FrameType, event_type: str, stdout_capture: io.StringIO, user_globals: dict[str, Any]) -> dict[str, Any]:
-	event: dict[str, Any] = {
-		"event": event_type,
-		"function": frame.f_code.co_name,
-		"line": frame.f_lineno,
-		"stack": _stack_for_frame(frame),
-		"locals": _snapshot_mapping(frame.f_locals),
-		"globals": _snapshot_mapping(user_globals),
-		"stdout": stdout_capture.getvalue(),
-	}
-	return event
-
-
-def run_user_code(code: str, stdin_text: str = "") -> dict[str, Any]:
-	stdout_capture = io.StringIO()
-	stderr_capture = io.StringIO()
-	stdin_capture = io.StringIO(stdin_text)
-
-	def mocked_input(prompt: str = "") -> str:
-		if prompt:
-			print(prompt, end="", file=stdout_capture)
-		line = stdin_capture.readline()
-		if line == "":
-			return ""
-		return line.rstrip("\n").rstrip("\r")
-
-	user_builtins = dict(builtins.__dict__)
-	user_builtins["input"] = mocked_input
-
-	user_globals: dict[str, Any] = {
-		"__name__": "__main__",
-		"__builtins__": user_builtins,
-	}
-	events: list[dict[str, Any]] = []
-	previous_trace = sys.gettrace()
-
-	def tracer(frame: FrameType, event: str, arg: Any):
-		if frame.f_code.co_filename != TRACE_FILENAME:
-			return tracer if event == "call" else None
-
-		if event in {"call", "line", "return"}:
-			events.append(_make_event(frame, event, stdout_capture, user_globals))
-		elif event == "exception":
-			exception_type, exception_value, _ = arg
-			exception_event = _make_event(frame, event, stdout_capture, user_globals)
-			exception_event["exception"] = f"{exception_type.__name__}: {exception_value}"
-			events.append(exception_event)
-
-		return tracer
-
-	try:
-		compiled = compile(code, TRACE_FILENAME, "exec")
-		with redirect_stdout(stdout_capture), redirect_stderr(stderr_capture):
-			original_stdin = sys.stdin
-			sys.stdin = stdin_capture
-			try:
-				sys.settrace(tracer)
-				exec(compiled, user_globals, user_globals)
-			finally:
-				sys.settrace(previous_trace)
-				sys.stdin = original_stdin
-	except Exception as exc:
-		error_text = "".join(traceback.format_exception_only(type(exc), exc)).strip()
-		return {
-			"status": "error",
-			"error": error_text,
-			"stdout": stdout_capture.getvalue(),
-			"stderr": stderr_capture.getvalue(),
-			"events": events,
-		}
-
-	return {
-		"status": "ok",
-		"stdout": stdout_capture.getvalue(),
-		"stderr": stderr_capture.getvalue(),
-		"events": events,
-	}

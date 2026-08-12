@@ -4,64 +4,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Python Visualizer MVP</title>
+  <title>My Python Compiler</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
   <header>
-    <h1>Python Visualizer MVP</h1>
-    <p>Paste Python code, run a safe trace, and step through execution.</p>
+    <h1>Python Web Compiler</h1>
+    <button id="run-btn" class="primary-btn">Run Code ▶</button>
   </header>
 
   <main class="container">
-    <!-- TOP SECTION: Inputs and Controls -->
-    <div class="top-section">
-      <div class="input-section">
-        <label for="code-input"><strong>Python code</strong></label>
-        <textarea id="code-input" rows="10" placeholder="Type your Python code here..."></textarea>
-      </div>
+    <!-- LEFT COLUMN: Code and Inputs -->
+    <div class="left-column">
+      <h3>main.py</h3>
+      <textarea id="code-input" placeholder="Write Python code here..."></textarea>
 
-      <div class="input-section">
-        <label for="program-inputs"><strong>Program input</strong> (One value per line)</label>
-        <textarea id="program-inputs" rows="3" placeholder="Enter inputs here (e.g. rock)"></textarea>
-      </div>
-
-      <div class="controls">
-        <button id="run-btn" class="primary-btn">Run Trace</button>
-        <button id="prev-btn">Previous</button>
-        <button id="next-btn">Next</button>
-        <button id="reset-btn">Reset</button>
-      </div>
-
-      <div class="timeline-container">
-        <label for="timeline">Timeline: </label>
-        <input type="range" id="timeline" min="0" value="0">
-      </div>
+      <h3>Standard Input (stdin)</h3>
+      <textarea id="program-inputs" class="small-box"
+        placeholder="If your code uses input(), type the values here (one per line)..."></textarea>
     </div>
 
-    <!-- BOTTOM SECTION: Side-by-side Alignment -->
-    <div class="bottom-section">
-      <div class="bottom-left">
-        <h3>Code Line Sync</h3>
-        <pre id="code-display" class="black-window">Run a trace to see code execution...</pre>
-      </div>
-
-      <div class="bottom-right">
-        <h3>Call Stack</h3>
-        <div id="call-stack-display" class="data-box">Main Script</div>
-
-        <h3>Explanation History</h3>
-        <div id="explanation-display" class="data-box explanation-text">
-          Waiting for trace to begin...
-        </div>
-
-        <h3>Output</h3>
-        <pre id="output-display" class="data-box"></pre>
-
-        <h3>Errors</h3>
-        <pre id="error-display" class="data-box error-text"></pre>
-      </div>
+    <!-- RIGHT COLUMN: Console Output -->
+    <div class="right-column">
+      <h3>Console Output</h3>
+      <pre id="terminal-display">Click 'Run Code' to see output...</pre>
     </div>
   </main>
 

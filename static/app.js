@@ -1,40 +1,41 @@
-// Function to update the screen whenever you click Next or Previous
-function updateUI() {
-  if (traceData.length === 0) return;
+const runBtn = document.getElementById('run-btn');
+const codeInput = document.getElementById('code-input');
+const programInputs = document.getElementById('program-inputs');
+const terminalDisplay = document.getElementById('terminal-display');
 
-  const step = traceData[currentStepIndex];
+runBtn.addEventListener('click', async () => {
+  const code = codeInput.value;
+  const inputs = programInputs.value;
 
-  // Update Timeline slider
-  timeline.value = currentStepIndex;
-
-  // Highlight the current line of code in the black window
-  const codeLines = codeInput.value.split('\n');
-  let highlightedCode = '';
-
-  for (let i = 0; i < codeLines.length; i++) {
-    const lineNum = String(i + 1).padStart(2, '0');
-
-    if (step.line === i + 1) {
-      highlightedCode += `<span style="background-color: #3b5998; color: white; display: block;">${lineNum}: ${codeLines[i]}</span>`;
-    } else {
-      highlightedCode += `${lineNum}: ${codeLines[i]}\n`;
-    }
+  if (!code.trim()) {
+    alert("Please write some code first!");
+    return;
   }
-  codeDisplay.innerHTML = highlightedCode;
 
-  // Build the Explanation History! (Never deletes old stuff)
-  let historyText = "";
-  for (let i = 0; i <= currentStepIndex; i++) {
-    if (traceData[i].explanation) {
-      historyText += traceData[i].explanation + "\n\n"; // Adds space between steps
+  terminalDisplay.innerText = "Running...";
+  terminalDisplay.style.color = "#c9d1d9"; // Reset color to standard terminal text
+
+  try {
+    const response = await fetch('/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: code, inputs: inputs })
+    });
+
+    const data = await response.json();
+
+    // If Python crashed or had a syntax error, show it in red
+    if (data.error) {
+      terminalDisplay.innerText = data.error;
+      terminalDisplay.style.color = "#ff7b72"; // Red error text
     }
-  }
-  explanationDisplay.innerText = historyText;
-  // Auto-scroll to the bottom of the history box
-  explanationDisplay.scrollTop = explanationDisplay.scrollHeight;
+    // Otherwise, show the normal print() outputs
+    else {
+      terminalDisplay.innerText = data.output || "Program finished with no output.";
+    }
 
-  // Update the right side boxes
-  callStackDisplay.innerText = step.call_stack || "Main Script";
-  outputDisplay.innerText = step.output || "";
-  errorDisplay.innerText = step.error || "";
-}
+  } catch (err) {
+    terminalDisplay.innerText = "Error: Could not connect to the server.";
+    terminalDisplay.style.color = "#ff7b72";
+  }
+});
